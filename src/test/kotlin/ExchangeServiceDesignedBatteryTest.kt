@@ -23,26 +23,42 @@ class ExchangeServiceDesignedBatteryTest : DescribeSpec({
 
     describe("battery designed from equivalence classes for ExchangeService") {
 
-        describe("input validation") {
+        describe("Validacion de inputs") {
             val provider = mockk<ExchangeRateProvider>()
             val service = ExchangeService(provider)
 
-            it("throws an exception when the amount is zero") {
+            it("Si tiene cantidad positiva y monedas de origen y destino con 3 letras devuelve la conversion") {
+                every { provider.rate("USDEUR") } returns 0.92
+                service.exchange(Money(1000, "USD"), "EUR") shouldBe 920
+
+            }
+
+            it("Lanza una excepcion si la cantidad es cero") {
                 shouldThrow<IllegalArgumentException> {
                     service.exchange(Money(0, "USD"), "EUR")
                 }
             }
 
-            it("throws an exception when the amount is negative") {
+            it("Lanza una excepcion si la cantidad negativa") {
+                shouldThrow<IllegalArgumentException> {
+                    service.exchange(Money(-1, "USD"), "EUR")
+                }
             }
 
-            it("throws an exception when the source currency code is invalid") {
+            it("Lanza una excepcion cuando el codigo de la moneda de origen no es valido") {
+                shouldThrow<IllegalArgumentException> {
+                    service.exchange(Money(1000, "ABCD"), "EUR")
+                }
             }
 
-            it("throws an exception when the target currency code is invalid") {
-
+            it("Lanza una excecion cuando el codigo de la moneda objetivo no es valido") {
+                shouldThrow<IllegalArgumentException> {
+                    service.exchange(Money(1000, "USD"), "WXYZ")
+                }
             }
         }
 
        //..
-}})
+        }
+    }
+)
