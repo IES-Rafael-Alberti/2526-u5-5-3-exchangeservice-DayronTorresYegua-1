@@ -58,6 +58,46 @@ class ExchangeServiceDesignedBatteryTest : DescribeSpec({
             }
         }
 
+        describe("Relación entre moneda origen y destino") {
+
+            it("Devolver misma cantidad si origen y destino son iguales") {
+                val realProvider = InMemoryExchangeRateProvider(mapOf("USDEUR" to 0.92))
+                val providerSpy = spyk(realProvider)
+                val service = ExchangeService(providerSpy)
+
+                service.exchange(Money(1000, "USD"), "USD") shouldBe 1000
+
+                verify(exactly = 0) { providerSpy.rate(any()) }
+                }
+
+            it("Origen y destino distinto con tasa directa") {
+                val provider = mockk<ExchangeRateProvider>()
+                every { provider.rate("USDEUR") } returns 0.92
+                val service = ExchangeService(provider)
+
+                service.exchange(Money(1000, "USD"), "EUR") shouldBe 920
+            }
+
+            it("Origen y destino distinto sin tasa directa pero con ruta cruzada valida") {
+                val provider = mockk<ExchangeRateProvider>()
+                every { provider.rate("USDEUR") } throws IllegalArgumentException("sin ruta")
+                every { provider.rate("USDGBP") } returns 0.79
+                every { provider.rate("GBPEUR") } returns 1.16
+                val service = ExchangeService(provider, supportedCurrencies = setOf("USD", "EUR", "GBP", "JPY"))
+
+                service.exchange(Money(1000, "USD"), "EUR") shouldBe (1000 * 0.79 * 1.16).toLong()
+            }
+
+            it("Origen y destino distinto sin ninguna ruta posible") {
+                val provider = mockk<ExchangeRateProvider>()
+                every { provider.rate(any()) } throws IllegalArgumentException("sin ruta")
+                val service = ExchangeService(provider, supportedCurrencies = setOf("USD", "EUR", "GBP", "JPY"))
+
+                shouldThrow<IllegalArgumentException> {
+                    service.exchange(Money(1000, "USD"), "EUR")
+                }
+            }
+        }
        //..
         }
     }
