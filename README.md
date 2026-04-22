@@ -1,4 +1,9 @@
+[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/Og7iRJ-r)
 # Mock, Stub o Spy en Kotlin
+
+Antes de empezar, recuerda que el objetivo es realizar la práctica aqui enlazada:
+- [pŕactica](#ejercicio-propuesto)
+- [preguntas](#preguntas)
 
 Este proyecto usa `Kotest` y `MockK` para probar un servicio de cambio de divisas. Antes de escribir pruebas, conviene tener clara la diferencia entre tres dobles de prueba muy habituales: `stub`, `spy` y `mock`.
 
@@ -259,9 +264,9 @@ Empieza siempre por el doble más simple que permita expresar bien la prueba:
 
 Eso suele producir tests más claros, más mantenibles y menos frágiles.
 
-## Ejercicio Propuesto: Batería de Pruebas para `ExchangeService`
+## Ejercicio Propuesto
 
-El ejercicio consiste en diseñar una batería de pruebas desde cero, a partir de la especificación del servicio y aplicando clases de equivalencia y selección consciente de dobles de prueba.
+El ejercicio consiste en diseñar una batería de pruebas para `ExchangeService` desde cero, a partir de la especificación del servicio y aplicando clases de equivalencia y selección consciente de dobles de prueba.
 
 siguiendo el estilo de `DescribeSpec` de `Kotest` y usando `MockK` para los dobles.
 
@@ -373,12 +378,161 @@ Implementa una batería con al menos los siguientes tests:
 
 El alumnado debe implementar una batería de pruebas propia para `ExchangeService`. Puedes usar las clases de equivalencia y casos propuestos como guía, o puedes diseñar tus propias clases de equivalencia y casos partiendo de los que ya hay. Lo importante es que la batería cubra aspectos relevantes (Clses de equivalencias) del servicio y que el uso de `stub`, `spy` y `mock` esté justificado por el caso concreto.
 
+El alumnado debe responder a las preguntas de mas abajo-.
+
 La solución debe:
 
 - justificar implícitamente el uso de `stub`, `spy` y `mock`
 - cubrir las clases de equivalencia anterioresv o tuyas
 - verificar tanto resultados como interacciones cuando corresponda
 
+## Preguntas
+
+Te dejo una batería de **preguntas de reflexión/evaluación** directamente alineadas con el ejercicio.
+
+Las preguntas están formuladas para que **mires tu propio código**, justifiques decisiones y, muy importante, **dejes enlaces permanentes (permalinks) al repositorio** como evidencia evaluable.
+
+
+### Preguntas de evaluación sobre la batería de pruebas
+
+> 📌 **Instrucción común para todas las preguntas:**
+> En cada respuesta debes incluir **enlaces permanentes (permalinks) al código** donde se evidencie lo que explicas (tests concretos, configuraciones, uso de mocks, etc.).
+
+
+#### 🔹 1) CE b) Se han definido casos de prueba
+
+**Pregunta:**
+
+Identifica **al menos 3 casos de prueba de tu batería** y explica:
+
+* Qué **clase de equivalencia** cubre cada uno (válida o inválida).
+* Qué **condición concreta del servicio** estás validando (validación, tasa directa, conversión cruzada, etc.).
+* Por qué ese caso es representativo dentro del conjunto de pruebas.
+
+Incluye enlaces a los tests correspondientes.
+
+**Caso 1 : Lanza una excepcion si la cantidad es cero**
+
+- Este test cubre la clase inválida "cantidad igual a cero". Lo que estoy comprobando es que el servicio rechaza una cantidad de cero antes de hacer nada más. Lo elegí porque el cero es justo el límite entre lo válido y lo inválido, y si no se prueba ese límite podrías tener un bug sin darte cuenta.
+
+https://github.com/IES-Rafael-Alberti/2526-u5-5-3-exchangeservice-DayronTorresYegua-1/blob/414d05443d62e3d1f8eb3e8e2103e3e7f2c1de55/src/test/kotlin/ExchangeServiceDesignedBatteryTest.kt#L36-L40
+
+**Caso 2 : Origen y destino distinto con tasa directa**
+
+- Este test cubre la clase válida "origen y destino distintos con tasa directa". Compruebo que cuando existe una tasa directa el servicio multiplica bien y devuelve el resultado correcto. Es el caso más normal de uso del servicio, por eso es importante que funcione.
+
+https://github.com/IES-Rafael-Alberti/2526-u5-5-3-exchangeservice-DayronTorresYegua-1/blob/414d05443d62e3d1f8eb3e8e2103e3e7f2c1de55/src/test/kotlin/ExchangeServiceDesignedBatteryTest.kt#L73-L79
+
+**Caso 3 : Fallo en primer cruce y éxito en un cruce alternativo posterior**
+
+- Este test cubre la clase "fallo en primer cruce y éxito en cruce alternativo posterior". Compruebo que el servicio no pare cuando el primer intermediario no funciona y sigue buscando otro. Si no se prueba podrías tener conversiones que fallen sin motivo.
+
+https://github.com/IES-Rafael-Alberti/2526-u5-5-3-exchangeservice-DayronTorresYegua-1/blob/414d05443d62e3d1f8eb3e8e2103e3e7f2c1de55/src/test/kotlin/ExchangeServiceDesignedBatteryTest.kt#L128-L138
+
+#### 🔹 2) CE f) Se han efectuado pruebas unitarias de clases y funciones
+
+**Pregunta:**
+
+Selecciona uno de tus tests y explica cómo se trata de una **prueba unitaria real sobre `ExchangeService`**:
+
+* Qué método estás probando exactamente.
+* Cómo has aislado la lógica de la clase respecto a sus dependencias.
+* Qué entrada proporcionas y qué salida verificas.
+
+Justifica por qué este test cumple con el concepto de prueba unitaria según el módulo 
+
+Incluye enlace al test.
+
+**Test: Origen y destino distinto con tasa directa.**
+
+- Estoy probando el método exchange de ExchangeService. Para aislarlo he usado un mockk que sustituye a ExchangeRateProvider, así el test no depende de ninguna implementación real. Le paso Money(1000, "USD") con destino "EUR" y verifico que devuelve 920. Es una prueba unitaria porque prueba solo ExchangeService sin tocar ninguna otra clase real.
+
+https://github.com/IES-Rafael-Alberti/2526-u5-5-3-exchangeservice-DayronTorresYegua-1/blob/414d05443d62e3d1f8eb3e8e2103e3e7f2c1de55/src/test/kotlin/ExchangeServiceDesignedBatteryTest.kt#L73-L79
+
+#### 🔹 3) CE g) Se han implementado pruebas automáticas
+
+**Pregunta:**
+
+Explica cómo se ejecuta tu batería de pruebas de forma automática:
+
+* Qué herramienta utilizas (Kotest, Gradle, etc.).
+* Cómo se lanzan todas las pruebas sin intervención manual.
+* Qué evidencia tienes de que los tests verifican automáticamente el comportamiento del sistema (por ejemplo: assertions, fallos, etc.).
+
+Incluye enlace a:
+
+* configuración (build.gradle.kts o similar)
+* ejecución de tests
+
+- Para ejecutar los tests uso Gradle con el comando ./gradlew test.
+
+- Configuracion
+
+https://github.com/IES-Rafael-Alberti/2526-u5-5-3-exchangeservice-DayronTorresYegua-1/blob/414d05443d62e3d1f8eb3e8e2103e3e7f2c1de55/build.gradle.kts#L1-L28
+- Tests
+
+![ejecucionTest.png](assets/ejecucionTest.png)
+
+
+#### 🔹 4) CE h) Se han documentado las incidencias detectadas
+
+**Pregunta:**
+
+Durante el desarrollo de la batería de pruebas, identifica **al menos una incidencia o comportamiento inesperado** que hayas detectado:
+
+* Qué test la detectó.
+* Qué comportamiento incorrecto observaste.
+* Cómo lo solucionaste (o cómo debería solucionarse).
+
+Relaciona esto con la importancia de documentar incidencias en el proceso de pruebas 
+
+Incluye enlace al test implicado.
+
+- La incidencia la detecté al intentar ejecutar la batería completa por primera vez después de escribir los primeros tests, en vez de ver los resultados se veia lo siguiente al ejecutar ./gradlew test
+
+```terminaloutput
+BUILD SUCCESSFUL in 992ms
+4 actionable tasks: 4 up-to-date
+```
+
+- El build decía BUILD SUCCESSFUL pero ningún test aparecía como pasado o fallado. El problema era que Gradle cacheaba los resultados y se saltaba los tests al no detectar cambios en el código
+
+- Lo solucioné añadiendo outputs.upToDateWhen { false } en el build.gradle.kts para que Gradle siempre ejecute los tests sin importar si el código ha cambiado o no, una vez añadido ya siempre al ejecutar el comando mostraba si los test habian pasado o no
+
+https://github.com/IES-Rafael-Alberti/2526-u5-5-3-exchangeservice-DayronTorresYegua-1/blob/414d05443d62e3d1f8eb3e8e2103e3e7f2c1de55/build.gradle.kts#L19-L25
+
+- Documentar esta incidencia evita que otro desarrollador o yo mismo pierda tiempo con el mismo problema y garantiza que los tests siempre se ejecuta de verdad.
+
+#### 🔹 5) CE i) Se han utilizado dobles de prueba para aislar los componentes durante las pruebas
+
+**Pregunta:**
+
+Analiza el uso de dobles de prueba en tu batería y explica:
+
+* Un caso donde hayas usado **stub**, otro con **mock** y otro con **spy**.
+* Qué objetivo tiene cada uno en ese test concreto.
+* Qué problema tendrías si usaras directamente `InMemoryExchangeRateProvider` en todos los casos.
+
+Relaciona tu explicación con la necesidad de reducir el acoplamiento en pruebas unitarias 
+
+Incluye enlaces a los tests donde se utilicen.
+
+**Stub en: "Si tiene cantidad positiva y monedas de origen y destino con 3 letras devuelve la conversion"**
+
+- Uso un mockk solo para devolver una tasa fija. No verifico nada más, solo que el resultado es correcto.
+
+https://github.com/IES-Rafael-Alberti/2526-u5-5-3-exchangeservice-DayronTorresYegua-1/blob/414d05443d62e3d1f8eb3e8e2103e3e7f2c1de55/src/test/kotlin/ExchangeServiceDesignedBatteryTest.kt#L30-L34
+
+**Spy en: "Exito en consulta directa"**
+
+- Uso spyk sobre InMemoryExchangeRateProvider para usar el comportamiento real y además comprobar que se llamó exactamente una vez con el par correcto.
+
+https://github.com/IES-Rafael-Alberti/2526-u5-5-3-exchangeservice-DayronTorresYegua-1/blob/414d05443d62e3d1f8eb3e8e2103e3e7f2c1de55/src/test/kotlin/ExchangeServiceDesignedBatteryTest.kt#L102-L110
+
+**Mock en: "Fallo en consulta directa y éxito en primer cruce válido"**
+- Uso mockk para controlar exactamente qué llamadas fallan y cuáles funcionan, y verifico el orden con verifySequence.
+
+Si usara InMemoryExchangeRateProvider en todos los casos no podría simular fallos, no podría verificar interacciones y si esa clase tuviera un bug también fallarían los tests de ExchangeService, sin saber cuál de las dos tiene el problema.
 
 ## Fuente conceptual
 
