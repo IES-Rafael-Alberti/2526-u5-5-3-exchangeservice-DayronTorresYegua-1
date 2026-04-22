@@ -98,7 +98,55 @@ class ExchangeServiceDesignedBatteryTest : DescribeSpec({
                 }
             }
         }
-       //..
+        describe("Estrategia de busqueda de tasas") {
+            it("Exito en consulta directa") {
+                val realProvider = InMemoryExchangeRateProvider(mapOf("USDEUR" to 0.92))
+                val providerSpy = spyk(realProvider)
+                val service = ExchangeService(providerSpy)
+
+                service.exchange(Money(1000, "USD"), "EUR") shouldBe 920
+
+                verify(exactly = 1) { providerSpy.rate("USDEUR") }
+            }
+
+            it("Fallo en consulta directa y éxito en primer cruce válido") {
+                val provider = mockk<ExchangeRateProvider>()
+                every { provider.rate("GBPJPY") } throws IllegalArgumentException("sin ruta")
+                every { provider.rate("GBPUSD") } returns 1.27
+                every { provider.rate("USDJPY") } returns 150.5
+                val service = ExchangeService(provider, supportedCurrencies = setOf("USD", "GBP", "JPY"))
+
+                service.exchange(Money(2, "GBP"), "JPY") shouldBe (2 * 1.27 * 150.5).toLong()
+
+                verifySequence {
+                    provider.rate("GBPJPY")
+                    provider.rate("GBPUSD")
+                    provider.rate("USDJPY")
+                }
+            }
+
+            it("Fallo en primer cruce y éxito en un cruce alternativo posterior") {
+                val provider = mockk<ExchangeRateProvider>()
+                every { provider.rate("GBPJPY") } throws IllegalArgumentException("sin ruta")
+                every { provider.rate("GBPEUR") } throws IllegalArgumentException("sin ruta")
+                every { provider.rate("EURJPY") } throws IllegalArgumentException("sin ruta")
+                every { provider.rate("GBPUSD") } returns 1.27
+                every { provider.rate("USDJPY") } returns 150.5
+                val service = ExchangeService(provider, supportedCurrencies = setOf("USD", "EUR", "GBP", "JPY"))
+
+                service.exchange(Money(2, "GBP"), "JPY") shouldBe (2 * 1.27 * 150.5).toLong()
+            }
+
+            it("Fallo en todas las consultas") {
+                val provider = mockk<ExchangeRateProvider>()
+                every { provider.rate(any()) } throws IllegalArgumentException("sin ruta")
+                val service = ExchangeService(provider, supportedCurrencies = setOf("USD", "EUR", "GBP", "JPY"))
+
+                shouldThrow<IllegalArgumentException> {
+                    service.exchange(Money(1000, "USD"), "EUR")
+                }
+            }
+        }
         }
     }
 )
