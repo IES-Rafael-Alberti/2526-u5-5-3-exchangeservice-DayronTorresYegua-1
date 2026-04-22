@@ -411,6 +411,23 @@ Identifica **al menos 3 casos de prueba de tu batería** y explica:
 
 Incluye enlaces a los tests correspondientes.
 
+**Caso 1 : Lanza una excepcion si la cantidad es cero**
+
+- Este test cubre la clase inválida "cantidad igual a cero". Lo que estoy comprobando es que el servicio rechaza una cantidad de cero antes de hacer nada más. Lo elegí porque el cero es justo el límite entre lo válido y lo inválido, y si no se prueba ese límite podrías tener un bug sin darte cuenta.
+
+https://github.com/IES-Rafael-Alberti/2526-u5-5-3-exchangeservice-DayronTorresYegua-1/blob/414d05443d62e3d1f8eb3e8e2103e3e7f2c1de55/src/test/kotlin/ExchangeServiceDesignedBatteryTest.kt#L36-L40
+
+**Caso 2 : Origen y destino distinto con tasa directa**
+
+- Este test cubre la clase válida "origen y destino distintos con tasa directa". Compruebo que cuando existe una tasa directa el servicio multiplica bien y devuelve el resultado correcto. Es el caso más normal de uso del servicio, por eso es importante que funcione.
+
+https://github.com/IES-Rafael-Alberti/2526-u5-5-3-exchangeservice-DayronTorresYegua-1/blob/414d05443d62e3d1f8eb3e8e2103e3e7f2c1de55/src/test/kotlin/ExchangeServiceDesignedBatteryTest.kt#L73-L79
+
+**Caso 3 : Fallo en primer cruce y éxito en un cruce alternativo posterior**
+
+- Este test cubre la clase "fallo en primer cruce y éxito en cruce alternativo posterior". Compruebo que el servicio no pare cuando el primer intermediario no funciona y sigue buscando otro. Si no se prueba podrías tener conversiones que fallen sin motivo.
+
+https://github.com/IES-Rafael-Alberti/2526-u5-5-3-exchangeservice-DayronTorresYegua-1/blob/414d05443d62e3d1f8eb3e8e2103e3e7f2c1de55/src/test/kotlin/ExchangeServiceDesignedBatteryTest.kt#L128-L138
 
 #### 🔹 2) CE f) Se han efectuado pruebas unitarias de clases y funciones
 
@@ -426,6 +443,11 @@ Justifica por qué este test cumple con el concepto de prueba unitaria según el
 
 Incluye enlace al test.
 
+**Test: Origen y destino distinto con tasa directa.**
+
+- Estoy probando el método exchange de ExchangeService. Para aislarlo he usado un mockk que sustituye a ExchangeRateProvider, así el test no depende de ninguna implementación real. Le paso Money(1000, "USD") con destino "EUR" y verifico que devuelve 920. Es una prueba unitaria porque prueba solo ExchangeService sin tocar ninguna otra clase real.
+
+https://github.com/IES-Rafael-Alberti/2526-u5-5-3-exchangeservice-DayronTorresYegua-1/blob/414d05443d62e3d1f8eb3e8e2103e3e7f2c1de55/src/test/kotlin/ExchangeServiceDesignedBatteryTest.kt#L73-L79
 
 #### 🔹 3) CE g) Se han implementado pruebas automáticas
 
@@ -442,6 +464,15 @@ Incluye enlace a:
 * configuración (build.gradle.kts o similar)
 * ejecución de tests
 
+- Para ejecutar los tests uso Gradle con el comando ./gradlew test.
+
+- Configuracion
+
+https://github.com/IES-Rafael-Alberti/2526-u5-5-3-exchangeservice-DayronTorresYegua-1/blob/414d05443d62e3d1f8eb3e8e2103e3e7f2c1de55/build.gradle.kts#L1-L28
+- Tests
+
+![ejecucionTest.png](assets/ejecucionTest.png)
+
 
 #### 🔹 4) CE h) Se han documentado las incidencias detectadas
 
@@ -457,6 +488,20 @@ Relaciona esto con la importancia de documentar incidencias en el proceso de pru
 
 Incluye enlace al test implicado.
 
+- La incidencia la detecté al intentar ejecutar la batería completa por primera vez después de escribir los primeros tests, en vez de ver los resultados se veia lo siguiente al ejecutar ./gradlew test
+
+```terminaloutput
+BUILD SUCCESSFUL in 992ms
+4 actionable tasks: 4 up-to-date
+```
+
+- El build decía BUILD SUCCESSFUL pero ningún test aparecía como pasado o fallado. El problema era que Gradle cacheaba los resultados y se saltaba los tests al no detectar cambios en el código
+
+- Lo solucioné añadiendo outputs.upToDateWhen { false } en el build.gradle.kts para que Gradle siempre ejecute los tests sin importar si el código ha cambiado o no, una vez añadido ya siempre al ejecutar el comando mostraba si los test habian pasado o no
+
+https://github.com/IES-Rafael-Alberti/2526-u5-5-3-exchangeservice-DayronTorresYegua-1/blob/414d05443d62e3d1f8eb3e8e2103e3e7f2c1de55/build.gradle.kts#L19-L25
+
+- Documentar esta incidencia evita que otro desarrollador o yo mismo pierda tiempo con el mismo problema y garantiza que los tests siempre se ejecuta de verdad.
 
 #### 🔹 5) CE i) Se han utilizado dobles de prueba para aislar los componentes durante las pruebas
 
@@ -472,6 +517,22 @@ Relaciona tu explicación con la necesidad de reducir el acoplamiento en pruebas
 
 Incluye enlaces a los tests donde se utilicen.
 
+**Stub en: "Si tiene cantidad positiva y monedas de origen y destino con 3 letras devuelve la conversion"**
+
+- Uso un mockk solo para devolver una tasa fija. No verifico nada más, solo que el resultado es correcto.
+
+https://github.com/IES-Rafael-Alberti/2526-u5-5-3-exchangeservice-DayronTorresYegua-1/blob/414d05443d62e3d1f8eb3e8e2103e3e7f2c1de55/src/test/kotlin/ExchangeServiceDesignedBatteryTest.kt#L30-L34
+
+**Spy en: "Exito en consulta directa"**
+
+- Uso spyk sobre InMemoryExchangeRateProvider para usar el comportamiento real y además comprobar que se llamó exactamente una vez con el par correcto.
+
+https://github.com/IES-Rafael-Alberti/2526-u5-5-3-exchangeservice-DayronTorresYegua-1/blob/414d05443d62e3d1f8eb3e8e2103e3e7f2c1de55/src/test/kotlin/ExchangeServiceDesignedBatteryTest.kt#L102-L110
+
+**Mock en: "Fallo en consulta directa y éxito en primer cruce válido"**
+- Uso mockk para controlar exactamente qué llamadas fallan y cuáles funcionan, y verifico el orden con verifySequence.
+
+Si usara InMemoryExchangeRateProvider en todos los casos no podría simular fallos, no podría verificar interacciones y si esa clase tuviera un bug también fallarían los tests de ExchangeService, sin saber cuál de las dos tiene el problema.
 
 ## Fuente conceptual
 
